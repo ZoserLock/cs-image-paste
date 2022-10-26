@@ -38,7 +38,12 @@ namespace ImagePaste
                 SetWorkingFolder(executableDirectory);
             }
 
-            _uiPathTextBox.Text = GetFileName();
+            _uiPathTextBox.Text = GetFinalPath();
+            _uiPathTextBox.Focus();
+
+            // TODO focus file name without extension
+            _uiPathTextBox.SelectionStart = _uiPathTextBox.Text.Length;
+            _uiPathTextBox.SelectionLength = 0;
 
             _clipboardData = GetClipboardData();
 
@@ -91,10 +96,20 @@ namespace ImagePaste
             return _defaultFileName + "_" + DateTime.Now.ToString("dd_MM_yyyy_HH_mm") + ".png";
         }
 
+        private string GetFinalPath()
+        {
+            return Path.Combine(_workingFolder, GetFileName());
+        }
+
         private bool SaveText()
         {
-            if (_clipboardData != null && _clipboardData.Type == ClipboardDataType.Text)
+            if (!string.IsNullOrEmpty(_clipboardData.Text))
             {
+                string outputPath = GetFinalPath();
+                string outputDirectory = Path.GetDirectoryName(outputPath);
+
+                File.WriteAllText(outputPath, _clipboardData.Text);
+
                 return true;
             }
 
@@ -103,15 +118,16 @@ namespace ImagePaste
 
         private bool SaveImage()
         {
-            if (_clipboardData != null && _clipboardData.Type == ClipboardDataType.Image &&  _clipboardData.Image != null)
+            if (_clipboardData.Image != null)
             {
-                string outputPath = Path.Combine(_workingFolder, _uiPathTextBox.Text);
+                string outputPath = GetFinalPath();
                 string outputDirectory = Path.GetDirectoryName(outputPath);
 
                 _clipboardData.Image.Save(outputPath);
 
                 if(!_launchedFromPath)
                 {
+                    // If not launched from context menu open output directory.
                     Process.Start("explorer.exe", outputDirectory);
                 }
 
@@ -122,9 +138,19 @@ namespace ImagePaste
 
         private void _uiMainButton_Click(object sender, EventArgs e)
         {
-            if(SaveImage())
+            if( _clipboardData.Type == ClipboardDataType.Image)
             {
-                Application.Exit();
+                if (SaveImage())
+                {
+                    Application.Exit();
+                }
+            }
+            else if (_clipboardData.Type == ClipboardDataType.Text)
+            {
+                if (SaveText())
+                {
+                    Application.Exit();
+                }
             }
         }
 

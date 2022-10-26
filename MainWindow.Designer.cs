@@ -76,7 +76,7 @@ namespace ImagePaste
             this.MaximumSize = new System.Drawing.Size(512, 190);
             this.MinimumSize = new System.Drawing.Size(512, 190);
             this.Name = "MainWindow";
-            this.Text = "Image Paste";
+            this.Text = "Image Pasta";
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainWindow_KeyDown);
             ((System.ComponentModel.ISupportInitialize)(this._uiPictureBox)).EndInit();
             this.ResumeLayout(false);
